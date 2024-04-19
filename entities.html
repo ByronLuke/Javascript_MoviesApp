@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- #region Sabio Code - You can Fold this region to remove it from sight -->
+    <meta charset="utf-8" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="referrer" content="unsafe-url" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Sabio Coding Bootcamp" />
+    <meta itemprop="image" content="https://sabio.la/Sabio.png">
+    <link rel="shortcut icon" href="https://sabio.la/Sabio.png">
+    <link rel="icon" type="image/png" href="https://sabio.la/Sabio.png" />
+    <!-- Do Not Change the HTML title or anything between this line and the line with the 💘's -->
+    <title>Movies</title>
+    <link href="https://pw.sabio.la/dist/all-site.css" rel="stylesheet" />
+
+    <script src="https://pw.sabio.la/api/js/site"></script>
+    <script src="https://unpkg.com/axios@0.19.2/dist/axios.min.js"></script>
+    <script src="https://pw.sabio.la/api/js/specs/Entities/01_entities_service.tests.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="entitiesService.js"></script>
+    <script src="usersService.js"></script>
+    <link rel="stylesheet" href="entities.css">
+    </link>
+    <script type="text/template" class="card-group" id="card-template">
+        <div class="card col-6 m-3" style="width: 400px;">
+            <img class="card-img-top"
+            id="card-image"
+                src=""
+                alt="Card image">
+
+            <div class="card-body">
+                <h5 class="card-title">
+                    Card title
+                </h5>
+
+                <p class="genre">
+                    This is just a simple card
+                    text inside card body
+                </p>
+
+                <p class="rating">
+                    Welcome to geeksforgeeks
+                </p>
+
+                <p class="description">
+                    This is just a simple card
+                    text inside card body
+                </p>
+                <p class="id d-none">
+                    This is just a simple card
+                    text inside card body
+                </p>
+            </div>
+
+            <div class="card-footer text-center card-buttons">
+                <button class="btn btn-primary" id="update" style="color:white">
+                    Update
+                </button>
+                <button class="btn btn-danger" id="delete" style="color:white">
+                    Delete
+                </button>
+            </div>
+        </div>
+</script>
+</head>
+
+<body>
+    <div class="text-center">
+        <form id="form" action=" /action_page.php">
+            <label for="movieTitle">Movie Title:</label><br>
+            <input placeholder="Enter Title" type="text" id="movieTitle" name="movieTitle"><br>
+            <label for="movieGenre">Movie Genre:</label><br>
+            <input placeholder="Enter Genre" type="text" id="movieGenre" name="movieGenre"><br>
+            <label for="movieRating">Movie Rating</label><br>
+            <input placeholder="Enter rating 1-10" type="text" id="movieRating" name="movieRating"><br>
+            <label for="moviePoster">Movie Poster</label><br>
+            <input placeholder="Enter valid Url" type="text" id="moviePoster" name="moviePoster"><br>
+            <label for="movieDescription">Movie Description</label><br>
+            <input placeholder="Enter Movie Description" type="text" id="movieDescription"
+                name="movieDescription"><br><br>
+            <button type="button" id="add" class="btn btn-primary">Add Movie</button>
+            <button type="button" id="update" class="btn btn-warning d-none">Send Update</button>
+            <button type="button" id="clear" class="btn btn-danger">Clear Form</button>
+            <button type="button" id="render" class="btn btn-success">Render Movies</button>
+        </form>
+    </div>
+    <div class="container">
+        <div class="row">
+
+        </div>
+    </div>
+
+</body>
+<script>
+    let id;
+    let payload;
+    startUp();
+    //Get template function
+    var cloneTemplate = function () {
+        var clone = $($('#card-template').html()).clone()
+        return clone
+    }
+    // Get form data
+    var formData = function (payload) {
+        if (payload) {
+            $("#movieTitle").val(payload.title)
+            $("#movieGenre").val(payload.genre);
+            $("#movieRating").val(payload.rating);
+            $("#moviePoster").val(payload.poster);
+            $("#movieDescription").val(payload.description);
+        } else {
+            return {
+                title: $("#movieTitle").val(),
+                genre: $("#movieGenre").val(),
+                rating: $("#movieRating").val(),
+                poster: $("#moviePoster").val(),
+                description: $("#movieDescription").val()
+            };
+        }
+    }
+    var createMovieCard = function (item) {
+        var clonedTemplate = cloneTemplate();
+        clonedTemplate.find('#card-image').attr('src', item.poster)
+        clonedTemplate.find('.card-title').text(item.title)
+        clonedTemplate.find('.card-title').attr('id', item.id)
+        clonedTemplate.find('.genre').text(item.genre)
+        clonedTemplate.find('.rating').text(`${item.rating}`)
+        clonedTemplate.find('.description').text(item.description)
+        clonedTemplate.find(".btn-danger").attr('id', item.id)
+        clonedTemplate.find(".btn-primary").attr('id', item.id)
+        return clonedTemplate;
+    }
+    // Delete movie functions
+    var onDeleteMovieSuccess = (response) => {
+        $(`#${id}`).closest(".card").remove()
+    }
+    var onDeleteMovieError = (err) => {
+        console.error("Error is: " + err);
+    }
+    function deleteMovie(e) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085D6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                id = e.target.id
+                entitiesService.deleteById(id)
+                    .then(onDeleteMovieSuccess)
+                    .catch(onDeleteMovieError)
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your file has been deleted.",
+                    icon: "success"
+                });
+            }
+        });
+        // if (confirm(text) == true) {
+        //     id = e.target.id
+        //     entitiesService.deleteById(id)
+        //         .then(onDeleteMovieSuccess)
+        //         .catch(onDeleteMovieError)
+        // } else {
+        //     alert("That was a close one!");
+        // }
+
+    }
+    // Add movie functions
+    var addMovie = function (e) {
+        payload = formData();
+        if (checkValidPayload(payload)) {
+            entitiesService.add(payload).then(onaddMovieSuccess).catch(onaddMovieError)
+        } else {
+            alert("Please check form is filled out correctly")
+        }
+    }
+    var onaddMovieSuccess = (response) => {
+        var addedMovie = createMovieCard(response)
+        $('.row').prepend(addedMovie)
+    }
+    var onaddMovieError = (err) => {
+        console.error(err);
+    }
+    // Update Movie functions
+    function updateForm(e) {
+
+        $("#update").removeClass("d-none")
+        $("#add").addClass("d-none")
+
+        var card = $(e.target).closest(".card")
+        payload = {};
+        payload.id = e.target.id
+        payload.title = card.find('.card-title').text()
+        payload.genre = card.find('.genre').text()
+        payload.rating = card.find('.rating').text()
+        payload.description = card.find('.description').text()
+        payload.poster = card.find('.card-img-top').attr('src')
+        formData(payload)
+        id = e.target.id
+    }
+
+    function updateData() {
+        var payload = formData();
+        updateMovie(id, payload)
+
+
+    }
+    function updateMovie(id, payload) {
+        if (checkValidPayload(payload)) {
+            entitiesService.update(id, payload).then(onUpdateMovieSuccess).catch(onUpdateMovieError)
+        } else {
+            alert("Please check form is filled out correctly")
+        }
+    }
+
+    var onUpdateMovieSuccess = (response) => {
+        console.log(id)
+
+        var updatedCard = $(`#${response.id}`).closest('.card')
+        updatedCard.find('.card-title').text(response.title)
+        updatedCard.find('.genre').text(response.genre)
+        updatedCard.find('.rating').text(response.rating)
+        updatedCard.find('.description').text(response.description)
+        updatedCard.find('.card-img-top').attr("src", response.poster)
+        $('.row').prepend(updatedCard)
+        console.log(response)
+    }
+    var onUpdateMovieError = (err) => {
+        console.error(err);
+    }
+
+    // Render Movie functions 
+    var renderMovies = function () {
+        console.log("Clicked render")
+        var movieArr = entitiesService.getAll()
+            .then(onRenderMovieSuccess)
+            .catch(onRenderMovieError)
+    }
+    var onRenderMovieSuccess = (response) => {
+        $('.row').empty()
+        response.data.items.forEach(item => {
+            var card = createMovieCard(item);
+            $('.row').append(card)
+        })
+    }
+
+    var onRenderMovieError = (err) => {
+        console.error(err);
+    }
+    //Clear movies functions
+    function clearMovie() {
+        $('input').val('')
+        $("#update").addClass("d-none")
+        $("#add").removeClass("d-none")
+        id = null;
+    }
+    var onclearMovieSuccess = (response) => {
+        console.log(response.data.item.pagedItems);
+    }
+    var onclearMovieError = (err) => {
+        console.error(err);
+    }
+    function checkValidPayload(payload) {
+        if (
+            !payload.title ||
+            !payload.genre ||
+            !payload.poster ||
+            !payload.description ||
+            !payload.rating ||
+            payload.rating < 0 ||
+            payload.rating > 10 ||
+            isNaN(payload.rating)
+        ) {
+            return false
+        } else {
+            return true;
+        }
+
+    }
+
+    function startUp() {
+        usersService.userLogin()
+        usersService.current().then((res) => { console.log(res); })
+        $("#add").on("click", addMovie);
+        $("#update").on("click", updateData);
+        $("#clear").on("click", clearMovie);
+        $("#render").on("click", renderMovies);
+        $(".container").on("click", ".btn-danger", deleteMovie)
+        $(".container").on("click", ".btn-primary", updateForm)
+    }
+
+</script>
+
+</html>

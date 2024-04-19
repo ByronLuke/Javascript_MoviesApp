@@ -1,0 +1,28 @@
+.card{
+    background-color: darkgoldenrod;
+    border-radius: 25px;
+    color: black;
+}
+.card img{
+    margin-top: 1em;
+    border-radius: 25px;
+}
+
+body{
+    background-color: rgb(17, 14, 0);
+    font-family: 'Cinzel', serif ;
+    /* background-image: url("https://t3.ftcdn.net/jpg/03/16/58/08/360_F_316580848_m7lZhhWQ43JrsEsBQQToJ8g73ALcv78Y.jpg"); */
+}
+label,input{
+    color: gold;
+    background-color: black;
+}
+input{
+    border: .5px solid goldenrod
+}
+button{
+    background-color: goldenrod !important;
+    color: black !important;
+    border: 2px solid rgb(48, 39, 0) !important;
+}
+
